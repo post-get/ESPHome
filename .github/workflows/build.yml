@@ -26,14 +26,15 @@ jobs:
           yaml-file: esp32-jk-d1.yaml
           version: stable
 
-      # 打印目录结构（调试用，确认文件位置）
+      # 打印目录结构（调试用，可后续删除）
       - name: 打印编译输出目录结构
         run: ls -laR ./.esphome/build
 
-      # 精准匹配.pioenvs里的firmware.bin
+      # 开启隐藏目录读取，递归匹配所有bin
       - name: 上传编译成品固件（可下载）
         uses: actions/upload-artifact@v4
         with:
           name: esp32-firmware-bin
-          path: ./.esphome/build/**/.pioenvs/**/firmware.bin
+          path: ./.esphome/build/**/*.bin
           if-no-files-found: ignore
+          include-hidden-files: true
