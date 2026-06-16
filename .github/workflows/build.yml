@@ -12,7 +12,6 @@ jobs:
       - name: 拉取仓库代码
         uses: actions/checkout@v4
 
-      # 动态生成secrets.yaml，注入GitHub仓库加密密钥
       - name: 生成ESPHome密钥文件
         run: |
           cat > secrets.yaml << EOF
@@ -27,9 +26,13 @@ jobs:
           yaml-file: esp32-jk-d1.yaml
           version: stable
 
-      # 修改此处path，添加**递归匹配子目录
+      # 新增：把编译生成的bin文件复制到仓库根目录
+      - name: 复制固件到根目录
+        run: cp ./.esphome/build/esp32-jk-d1/*.bin ./firmware.bin
+
+      # 上传根目录下的固件
       - name: 上传编译成品固件（可下载）
         uses: actions/upload-artifact@v4
         with:
           name: esp32-firmware-bin
-          path: ./.esphome/build/**/*.bin
+          path: ./firmware.bin
