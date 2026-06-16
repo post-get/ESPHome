@@ -1,0 +1,34 @@
+name: Build ESPHome Firmware
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取仓库代码
+        uses: actions/checkout@v4
+
+      # 动态生成secrets.yaml，注入GitHub仓库加密密钥
+      - name: 生成ESPHome密钥文件
+        run: |
+          cat > secrets.yaml << EOF
+          wifi_ssid: ${{ secrets.WIFI_SSID }}
+          wifi_password: ${{ secrets.WIFI_PASSWORD }}
+          ota_password: ${{ secrets.OTA_PASSWORD }}
+          EOF
+
+      - name: ESPHome 云端编译固件
+        uses: esphome/build-action@v7.1.0
+        with:
+          yaml-file: esp32-jk-d1.yaml
+          version: stable
+
+      - name: 上传编译成品固件（可下载）
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-firmware-bin
+          path: ./.esphome/build/*.bin
