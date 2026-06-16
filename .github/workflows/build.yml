@@ -27,8 +27,9 @@ jobs:
           yaml-file: esp32-jk-d1.yaml
           version: stable
 
+      # 修改此处path，添加**递归匹配子目录
       - name: 上传编译成品固件（可下载）
         uses: actions/upload-artifact@v4
         with:
           name: esp32-firmware-bin
-          path: ./.esphome/build/*.bin
+          path: ./.esphome/build/**/*.bin
