@@ -38,7 +38,7 @@ ble_client:
 jk_bms_ble:
   ble_client_id: ble_d1
   id: bms_d1
-  protocol_version: JK02_24S
+  protocol_version: JK02_32S
   throttle: 10s
 
 switch:
