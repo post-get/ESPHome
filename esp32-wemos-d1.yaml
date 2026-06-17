@@ -38,21 +38,21 @@ esp32:
 #  timeout: 2ms
 
 wifi:
-  ssid: !secret WIFI_SSID
-  password: !secret WIFI_PASSWORD
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
 
 logger:
   level: INFO
 
 api:
 ota:
-  password: !secret OTA_PASSWORD
+  password: !secret ota_password
 
 mqtt:
-  broker: !secret MQTT_BROKER
+  broker: !secret mqtt_broker
   port: 1883
-  username: !secret MQTT_USER
-  password: !secret MQTT_PASSWORD
+  username: !secret mqtt_user
+  password: !secret mqtt_password
   client_id: ${device_id}
   id: mqtt_client
   birth_message:
