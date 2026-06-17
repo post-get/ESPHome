@@ -1,6 +1,11 @@
 esphome:
   name: esp32-jk-bms-only
   friendly_name: D1电池
+  on_boot:
+    priority: 600
+    then:
+      - delay: 3s
+      - logger.log: "ESP32启动完成，等待连接BMS蓝牙"
 
 external_components:
   - source: github://syssi/esphome-jk-bms@main
@@ -15,10 +20,10 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   fast_connect: true
-  output_power: 10dB  # 降低WiFi发射功率，减少2.4G干扰BLE
+  output_power: 10dB
 
 logger:
-  level: WARN  # 关闭冗余蓝牙日志，减少总线占用
+  level: WARN
 
 api:
 
@@ -39,35 +44,40 @@ jk_bms_ble:
   ble_client_id: ble_d1
   id: bms_d1
   protocol_version: JK02_32S
-  throttle: 5s  # 全局5秒读取一次所有数据
+  throttle: 5s
+  reconnect_delay: 2s
 
+# 【语义修正】开关 = 下发控制指令，后缀标注“控制闸”
 switch:
   - platform: jk_bms_ble
     jk_bms_ble_id: bms_d1
     charging:
-      name: "D1_SW1 充电开关"
+      name: "D1_SW1 充电控制闸（下发指令）"
     discharging:
-      name: "D1_SW2 放电开关"
+      name: "D1_SW2 放电控制闸（下发指令）"
     balancer:
-      name: "D1_SW3 均衡开关"
+      name: "D1_SW3 均衡控制闸（下发指令）"
 
+# 【语义修正】binary_sensor = 硬件MOS真实通断状态，后缀标注“MOS硬件状态”
 binary_sensor:
   - platform: jk_bms_ble
     jk_bms_ble_id: bms_d1
     balancing:
-      name: "D1_BAL 均衡中"
+      name: "D1_BAL 均衡MOS硬件导通状态"
       filters:
-        - timeout: 10s  # 失联10秒标记不可用，杜绝状态卡死
+        - timeout: 10s
     charging:
-      name: "D1_ST_CHG 充电状态"
+      name: "D1_ST_CHG 充电MOS硬件导通状态"
       filters:
         - timeout: 10s
     discharging:
-      name: "D1_ST_DIS 放电状态"
+      name: "D1_ST_DIS 放电MOS硬件导通状态"
       filters:
         - timeout: 10s
     online_status:
-      name: "D1_ON BMS在线状态"
+      name: "D1_ON BMS蓝牙在线状态"
+      filters:
+        - timeout: 15s
 
 sensor:
   - platform: jk_bms_ble
@@ -101,7 +111,6 @@ sensor:
     delta_cell_voltage:
       name: "D1_S10 电芯压差"
 
-    # 单串电压：硬件5秒读取，仅每3分钟向HA上报一次
     cell_voltage_1:
       name: "D1_CELL01 第1串电压"
       filters:
@@ -171,7 +180,6 @@ sensor:
       filters:
         - throttle: 180s
 
-    # 温度、MOS管温度保留
     mosfet_temperature:
       name: "D1_S11 MOS管温度"
     temperature_sensor_1:
