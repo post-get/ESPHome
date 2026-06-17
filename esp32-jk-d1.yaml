@@ -15,9 +15,10 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   fast_connect: true
+  output_power: 10dB  # 降低WiFi发射功率，减少2.4G干扰BLE
 
 logger:
-  level: INFO
+  level: WARN  # 关闭冗余蓝牙日志，减少总线占用
 
 api:
 
@@ -38,7 +39,7 @@ jk_bms_ble:
   ble_client_id: ble_d1
   id: bms_d1
   protocol_version: JK02_32S
-  throttle: 5s
+  throttle: 5s  # 全局5秒读取一次所有数据
 
 switch:
   - platform: jk_bms_ble
@@ -55,10 +56,16 @@ binary_sensor:
     jk_bms_ble_id: bms_d1
     balancing:
       name: "D1_BAL 均衡中"
+      filters:
+        - timeout: 10s  # 失联10秒标记不可用，杜绝状态卡死
     charging:
       name: "D1_ST_CHG 充电状态"
+      filters:
+        - timeout: 10s
     discharging:
       name: "D1_ST_DIS 放电状态"
+      filters:
+        - timeout: 10s
     online_status:
       name: "D1_ON BMS在线状态"
 
@@ -93,74 +100,78 @@ sensor:
       name: "D1_S09 单串最高电压"
     delta_cell_voltage:
       name: "D1_S10 电芯压差"
+
+    # 单串电压：硬件5秒读取，仅每3分钟向HA上报一次
     cell_voltage_1:
       name: "D1_CELL01 第1串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_2:
       name: "D1_CELL02 第2串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_3:
       name: "D1_CELL03 第3串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_4:
       name: "D1_CELL04 第4串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_5:
       name: "D1_CELL05 第5串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_6:
       name: "D1_CELL06 第6串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_7:
       name: "D1_CELL07 第7串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_8:
       name: "D1_CELL08 第8串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_9:
       name: "D1_CELL09 第9串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_10:
       name: "D1_CELL10 第10串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_11:
       name: "D1_CELL11 第11串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_12:
       name: "D1_CELL12 第12串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_13:
       name: "D1_CELL13 第13串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_14:
       name: "D1_CELL14 第14串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_15:
       name: "D1_CELL15 第15串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_16:
       name: "D1_CELL16 第16串电压"
+      filters:
+        - throttle: 180s
     cell_voltage_17:
       name: "D1_CELL17 第17串电压"
-    cell_resistance_1:
-      name: "D1_R01 1#电芯内阻"
-    cell_resistance_2:
-      name: "D1_R02 2#电芯内阻"
-    cell_resistance_3:
-      name: "D1_R03 3#电芯内阻"
-    cell_resistance_4:
-      name: "D1_R04 4#电芯内阻"
-    cell_resistance_5:
-      name: "D1_R05 5#电芯内阻"
-    cell_resistance_6:
-      name: "D1_R06 6#电芯内阻"
-    cell_resistance_7:
-      name: "D1_R07 7#电芯内阻"
-    cell_resistance_8:
-      name: "D1_R08 8#电芯内阻"
-    cell_resistance_9:
-      name: "D1_R09 9#电芯内阻"
-    cell_resistance_10:
-      name: "D1_R10 10#电芯内阻"
-    cell_resistance_11:
-      name: "D1_R11 11#电芯内阻"
-    cell_resistance_12:
-      name: "D1_R12 12#电芯内阻"
-    cell_resistance_13:
-      name: "D1_R13 13#电芯内阻"
-    cell_resistance_14:
-      name: "D1_R14 14#电芯内阻"
-    cell_resistance_15:
-      name: "D1_R15 15#电芯内阻"
-    cell_resistance_16:
-      name: "D1_R16 16#电芯内阻"
-    cell_resistance_17:
-      name: "D1_R17 17#电芯内阻"
+      filters:
+        - throttle: 180s
+
+    # 温度、MOS管温度保留
     mosfet_temperature:
       name: "D1_S11 MOS管温度"
     temperature_sensor_1:
@@ -176,6 +187,5 @@ text_sensor:
     errors:
       name: "D1_T02 BMS故障日志"
 
-#不需要状态灯直接删除下面两行
 status_led:
   pin: GPIO2
