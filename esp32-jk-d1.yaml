@@ -5,6 +5,12 @@ esphome:
     priority: 600
     then:
       - logger.log: "设备启动完成"
+      # 上电强制关闭所有继电器，防止上电误动作重启
+      - switch.turn_off: relay1
+      - switch.turn_off: relay2
+      - switch.turn_off: relay3
+      - switch.turn_off: relay4
+      - switch.turn_off: relay9
 
 substitutions:
   device_name: esp32_jk_d1
@@ -14,7 +20,7 @@ substitutions:
   relay3_pin: GPIO3
   relay4_pin: GPIO4
   relay9_pin: GPIO10
-  key_pin: GPIO8
+  key_pin: GPIO27       # 已替换安全引脚，避开Flash GPIO8
   rain_ao_pin: GPIO0
   gy302_sda: GPIO32
   gy302_scl: GPIO25
@@ -27,6 +33,8 @@ esp32:
   board: esp32dev
   framework:
     type: arduino
+    advanced:
+      sram1_as_iram: true  # 消除日志SRAM警告
 
 i2c:
   sda: ${gy302_sda}
@@ -36,7 +44,7 @@ i2c:
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-  fast_connect: true
+  # fast_connect: true  # 关闭快速连接，提升稳定性
 
 logger:
   level: INFO
@@ -113,7 +121,6 @@ jk_bms_ble:
 
 switch:
   - platform: jk_bms_ble
-    jk_bms_ble_id: bms_d1
     charging:
       name: "D1_SW1 充电开关"
     discharging:
@@ -203,7 +210,6 @@ switch:
 
 sensor:
   - platform: jk_bms_ble
-    jk_bms_ble_id: bms_d1
     total_voltage:
       name: "D1_S01 总电压"
     current:
@@ -299,7 +305,6 @@ sensor:
 
 text_sensor:
   - platform: jk_bms_ble
-    jk_bms_ble_id: bms_d1
     total_runtime_formatted:
       name: "D1_T01 累计运行时长"
     errors:
@@ -336,6 +341,6 @@ binary_sensor:
 
   - platform: template
     id: rain_raining
-    name: "${friendly_name} 是否下雨"
+    name: "是否下雨"
     icon: mdi:umbrella
     device_class: moisture
