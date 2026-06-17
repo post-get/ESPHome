@@ -36,7 +36,6 @@ esp32:
   framework:
     type: arduino
 
-# I2C总线（BH1750强制依赖，补齐）
 i2c:
   sda: ${gy302_sda}
   scl: ${gy302_scl}
@@ -212,7 +211,6 @@ switch:
     icon: mdi:power-socket-us
 
 sensor:
-  # JK-BMS 17串完整采集，无语法废弃参数
   - platform: jk_bms_ble
     jk_bms_ble_id: bms_d1
     total_voltage:
@@ -276,7 +274,6 @@ sensor:
     temperature_sensor_2:
       name: "D1_S13 温度探头2"
 
-  # GY302 BH1750 光照传感器，关键字on_value，无非法on_value_update
   - platform: bh1750
     id: gy302_sensor
     name: "${friendly_name} 光照强度"
@@ -293,7 +290,6 @@ sensor:
             dtostrf(x, 4, 1, buf);
             id(mqtt_client).publish("esp32/4ch_relay/${device_name}/light/lux", buf, true);
 
-  # 雨水ADC：attenuation修正为12db，on_value，名称加1解决ID冲突
   - platform: adc
     id: rain_sensor
     name: "${friendly_name} 雨水湿度1"
@@ -324,7 +320,6 @@ text_sensor:
     icon: mdi:console-line
 
 binary_sensor:
-  # 按键：修复debounce、multi-click完整语法、GPIO8引脚校验跳过
   - platform: gpio
     id: key_button
     pin:
@@ -333,15 +328,13 @@ binary_sensor:
       inverted: true
       ignore_pin_validation_error: true
     filters:
-      - delay_on: 20ms
+      - debounce: 20ms
     on_multi_click:
-      # 单击标准5段语法
       - timing:
           - ON for at most 500ms
           - OFF for at least 500ms
         then:
           - switch.toggle: relay1
-      # 双击标准5段语法
       - timing:
           - ON for at most 500ms
           - OFF for at most 500ms
@@ -350,7 +343,6 @@ binary_sensor:
         then:
           - switch.toggle: relay9
 
-  # 下雨判断模板传感器，无冲突ID
   - platform: template
     id: rain_raining
     name: "${friendly_name} 是否下雨"
