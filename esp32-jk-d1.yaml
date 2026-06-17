@@ -44,6 +44,7 @@ i2c:
   sda: ${gy302_sda}
   scl: ${gy302_scl}
   scan: true
+  timeout: 2ms
 
 wifi:
   ssid: !secret wifi_ssid
