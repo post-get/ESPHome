@@ -328,7 +328,7 @@ binary_sensor:
       inverted: true
       ignore_pin_validation_error: true
     filters:
-      - debounce: 20ms
+      - delayed_on: 20ms
     on_multi_click:
       - timing:
           - ON for at most 500ms
