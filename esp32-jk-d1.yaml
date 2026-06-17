@@ -175,10 +175,6 @@ text_sensor:
       name: "D1_T01 累计运行时长"
     errors:
       name: "D1_T02 BMS故障日志"
-    operation_mode:
-      name: "D1_MODE 运行模式"
-    battery_type:
-      name: "D1_BATT_TYPE 电池类型"
 
 #不需要状态灯直接删除下面两行
 status_led:
