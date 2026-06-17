@@ -26,6 +26,9 @@ ota:
   password: !secret ota_password
 
 esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 110ms
 
 ble_client:
   mac_address: "98:DA:10:07:AD:85"
@@ -35,7 +38,7 @@ jk_bms_ble:
   ble_client_id: ble_d2
   id: bms_d2
   protocol_version: JK02_32S
-  throttle: 10s
+  throttle: 5s
 
 switch:
   - platform: jk_bms_ble
@@ -47,6 +50,18 @@ switch:
     balancer:
       name: "D2_SW3 均衡开关"
 
+binary_sensor:
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms_d2
+    balancing:
+      name: "D2_BAL 均衡中"
+    charging_status:
+      name: "D2_ST_CHG 充电状态"
+    discharging_status:
+      name: "D2_ST_DIS 放电状态"
+    online:
+      name: "D2_ON BMS在线状态"
+
 sensor:
   - platform: jk_bms_ble
     jk_bms_ble_id: bms_d2
@@ -56,10 +71,18 @@ sensor:
       name: "D2_S02 充放电电流"
     power:
       name: "D2_S03 实时功率"
+    charging_power:
+      name: "D2_P_CHG 充电功率"
+    discharging_power:
+      name: "D2_P_DIS 放电功率"
+    heating_current:
+      name: "D2_I_HEAT 加热电流"
     state_of_charge:
       name: "D2_S04 SOC电量"
     capacity_remaining:
       name: "D2_S05 剩余容量"
+    full_charge_capacity:
+      name: "D2_CAP_FULL 额定总容量"
     total_charging_cycle_capacity:
       name: "D2_S06 总循环容量AH"
     average_cell_voltage:
@@ -104,6 +127,40 @@ sensor:
       name: "D2_CELL16 第16串电压"
     cell_voltage_17:
       name: "D2_CELL17 第17串电压"
+    cell_resistance_1:
+      name: "D2_R01 1#电芯内阻"
+    cell_resistance_2:
+      name: "D2_R02 2#电芯内阻"
+    cell_resistance_3:
+      name: "D2_R03 3#电芯内阻"
+    cell_resistance_4:
+      name: "D2_R04 4#电芯内阻"
+    cell_resistance_5:
+      name: "D2_R05 5#电芯内阻"
+    cell_resistance_6:
+      name: "D2_R06 6#电芯内阻"
+    cell_resistance_7:
+      name: "D2_R07 7#电芯内阻"
+    cell_resistance_8:
+      name: "D2_R08 8#电芯内阻"
+    cell_resistance_9:
+      name: "D2_R09 9#电芯内阻"
+    cell_resistance_10:
+      name: "D2_R10 10#电芯内阻"
+    cell_resistance_11:
+      name: "D2_R11 11#电芯内阻"
+    cell_resistance_12:
+      name: "D2_R12 12#电芯内阻"
+    cell_resistance_13:
+      name: "D2_R13 13#电芯内阻"
+    cell_resistance_14:
+      name: "D2_R14 14#电芯内阻"
+    cell_resistance_15:
+      name: "D2_R15 15#电芯内阻"
+    cell_resistance_16:
+      name: "D2_R16 16#电芯内阻"
+    cell_resistance_17:
+      name: "D2_R17 17#电芯内阻"
     mosfet_temperature:
       name: "D2_S11 MOS管温度"
     temperature_sensor_1:
@@ -118,6 +175,10 @@ text_sensor:
       name: "D2_T01 累计运行时长"
     errors:
       name: "D2_T02 BMS故障日志"
+    operation_mode:
+      name: "D2_MODE 运行模式"
+    battery_type:
+      name: "D2_BATT_TYPE 电池类型"
 
 #不需要状态灯直接删除下面两行
 status_led:
