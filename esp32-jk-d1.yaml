@@ -1,10 +1,34 @@
 esphome:
   name: esp32-jk-d1
   friendly_name: D1电池采集ESP32
+  on_boot:
+    priority: 600
+    then:
+      - lambda: |-
+          // 初始化继电器状态（从闪存恢复）
+          for (int i = 0; i < 5; i++) {
+            bool state = id(relay_storage).get_bool(String(i).c_str(), false);
+            if (i == 0) id(relay1).publish_state(state);
+            if (i == 1) id(relay2).publish_state(state);
+            if (i == 2) id(relay3).publish_state(state);
+            if (i == 3) id(relay4).publish_state(state);
+            if (i == 4) id(relay9).publish_state(state);
+          }
 
 substitutions:
   device_name: esp32_jk_d1
   friendly_name: D1电池采集ESP32
+  
+  # 引脚定义（按你硬件实际引脚修改）
+  relay1_pin: GPIO1
+  relay2_pin: GPIO2
+  relay3_pin: GPIO3
+  relay4_pin: GPIO4
+  relay9_pin: GPIO10
+  key_pin: GPIO8
+  rain_ao_pin: GPIO0
+  gy302_sda: GPIO32
+  gy302_scl: GPIO25
 
 external_components:
   - source: github://syssi/esphome-jk-bms@main
@@ -15,6 +39,7 @@ esp32:
   framework:
     type: arduino
 
+# 基础网络
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
@@ -29,6 +54,22 @@ ota:
   platform: esphome
   password: !secret ota_password
 
+# MQTT 配置（沿用你原有地址/账号/主题）
+mqtt:
+  broker: 10.10.8.197
+  port: 1883
+  username: mqtt1
+  password: mqtt1
+  client_id: ${device_name}
+  availability:
+    topic: esp32/4ch_relay/${device_name}/availability
+    payload_available: online
+    payload_not_available: offline
+  on_connect:
+    then:
+      - logger.log: "MQTT连接成功"
+
+# BLE + JK-BMS 电池采集（原有功能完整保留）
 esp32_ble_tracker:
 
 ble_client:
@@ -41,7 +82,16 @@ jk_bms_ble:
   protocol_version: JK02_32S
   throttle: 10s
 
+# 闪存存储（保存继电器断电状态）
+globals:
+  - id: relay_storage
+    type: Preferences
+    restore_value: no
+    initial_value: 'Preferences()'
+
+# 开关：BMS开关 + 5路继电器
 switch:
+  # JK-BMS 充/放/均衡开关
   - platform: jk_bms_ble
     jk_bms_ble_id: bms_d1
     charging:
@@ -51,7 +101,89 @@ switch:
     balancer:
       name: "D1_SW3 均衡开关"
 
+  # 继电器1
+  - platform: gpio
+    id: relay1
+    name: "${friendly_name} Relay1"
+    pin:
+      number: ${relay1_pin}
+      inverted: true
+    on_state_change:
+      then:
+        - lambda: |-
+            id(relay_storage).begin("relay", false);
+            id(relay_storage).put_bool("0", x);
+            id(relay_storage).end();
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay1/state", x ? "ON" : "OFF", true);
+    icon: mdi:power-socket-us
+
+  # 继电器2
+  - platform: gpio
+    id: relay2
+    name: "${friendly_name} Relay2"
+    pin:
+      number: ${relay2_pin}
+      inverted: true
+    on_state_change:
+      then:
+        - lambda: |-
+            id(relay_storage).begin("relay", false);
+            id(relay_storage).put_bool("1", x);
+            id(relay_storage).end();
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay2/state", x ? "ON" : "OFF", true);
+    icon: mdi:power-socket-us
+
+  # 继电器3
+  - platform: gpio
+    id: relay3
+    name: "${friendly_name} Relay3"
+    pin:
+      number: ${relay3_pin}
+      inverted: true
+    on_state_change:
+      then:
+        - lambda: |-
+            id(relay_storage).begin("relay", false);
+            id(relay_storage).put_bool("2", x);
+            id(relay_storage).end();
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay3/state", x ? "ON" : "OFF", true);
+    icon: mdi:power-socket-us
+
+  # 继电器4
+  - platform: gpio
+    id: relay4
+    name: "${friendly_name} Relay4"
+    pin:
+      number: ${relay4_pin}
+      inverted: true
+    on_state_change:
+      then:
+        - lambda: |-
+            id(relay_storage).begin("relay", false);
+            id(relay_storage).put_bool("3", x);
+            id(relay_storage).end();
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay4/state", x ? "ON" : "OFF", true);
+    icon: mdi:power-socket-us
+
+  # 继电器9
+  - platform: gpio
+    id: relay9
+    name: "${friendly_name} Relay9"
+    pin:
+      number: ${relay9_pin}
+      inverted: false
+    on_state_change:
+      then:
+        - lambda: |-
+            id(relay_storage).begin("relay", false);
+            id(relay_storage).put_bool("4", x);
+            id(relay_storage).end();
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay9/state", x ? "ON" : "OFF", true);
+    icon: mdi:power-socket-us
+
+# 传感器：BMS全套 + GY302光照 + 雨水模拟量
 sensor:
+  # JK-BMS 所有电压/电流/电芯/温度传感器
   - platform: jk_bms_ble
     jk_bms_ble_id: bms_d1
     total_voltage:
@@ -115,6 +247,43 @@ sensor:
     temperature_sensor_2:
       name: "D1_S13 温度探头2"
 
+  # GY302(BH1750) 光照传感器
+  - platform: bh1750
+    id: gy302_sensor
+    name: "${friendly_name} 光照强度"
+    address: 0x23
+    update_interval: 2s
+    sda: ${gy302_sda}
+    scl: ${gy302_scl}
+    unit_of_measurement: lx
+    device_class: illuminance
+    state_class: measurement
+    icon: mdi:sun-wireless-outline
+    on_value_update:
+      then:
+        - lambda: |-
+            char buf[16];
+            dtostrf(x, 4, 1, buf);
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/light/lux", buf, true);
+
+  # 雨水模拟量传感器(原始ADC值)
+  - platform: adc
+    id: rain_sensor
+    name: "${friendly_name} 雨水湿度"
+    pin: ${rain_ao_pin}
+    update_interval: 2s
+    attenuation: 11db
+    raw: true
+    icon: mdi:water
+    on_value_update:
+      then:
+        - lambda: |-
+            char buf[16];
+            itoa(x, buf, 10);
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/rain/value", buf, true);
+            id(rain_raining).publish_state(x < 3000);
+
+# 文本传感器：BMS运行时长、故障日志、系统日志
 text_sensor:
   - platform: jk_bms_ble
     jk_bms_ble_id: bms_d1
@@ -123,5 +292,89 @@ text_sensor:
     errors:
       name: "D1_T02 BMS故障日志"
 
-status_led:
-  pin: GPIO2
+  - platform: template
+    id: esp32_log
+    name: "${friendly_name} 系统日志"
+    icon: mdi:console-line
+
+# 二进制传感器：按键单击/双击、下雨判断
+binary_sensor:
+  - platform: gpio
+    id: key_button
+    pin:
+      number: ${key_pin}
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - debounce: 20ms
+    on_multi_click:
+      # 单击 → 触发Relay1
+      - timing:
+          - ON for <500ms
+          - OFF for >500ms
+        then:
+          - switch.toggle: relay1
+          - lambda: |-
+              bool state = id(relay1).state;
+              String log_str = "【单击】触发 RELAY1: " + String(state ? "ON" : "OFF");
+              id(esp32_log).publish_state(log_str);
+              id(mqtt_client).publish("esp32/4ch_relay/${device_name}/log", log_str.c_str(), true);
+      # 双击 → 触发Relay9
+      - timing:
+          - ON for <500ms
+          - OFF for <500ms
+          - ON for <500ms
+          - OFF for >500ms
+        then:
+          - switch.toggle: relay9
+          - lambda: |-
+              bool state = id(relay9).state;
+              String log_str = "【双击】触发 RELAY9: " + String(state ? "ON" : "OFF");
+              id(esp32_log).publish_state(log_str);
+              id(mqtt_client).publish("esp32/4ch_relay/${device_name}/log", log_str.c_str(), true);
+
+  # 下雨判断
+  - platform: template
+    id: rain_raining
+    name: "${friendly_name} 是否下雨"
+    icon: mdi:umbrella
+    device_class: moisture
+
+# MQTT 远程控制订阅（完整保留原主题）
+mqtt:
+  id: mqtt_client
+  on_message:
+    - topic: esp32/4ch_relay/${device_name}/relay1/set
+      payload: "ON"
+      then: [switch.turn_on: relay1]
+    - topic: esp32/4ch_relay/${device_name}/relay1/set
+      payload: "OFF"
+      then: [switch.turn_off: relay1]
+
+    - topic: esp32/4ch_relay/${device_name}/relay2/set
+      payload: "ON"
+      then: [switch.turn_on: relay2]
+    - topic: esp32/4ch_relay/${device_name}/relay2/set
+      payload: "OFF"
+      then: [switch.turn_off: relay2]
+
+    - topic: esp32/4ch_relay/${device_name}/relay3/set
+      payload: "ON"
+      then: [switch.turn_on: relay3]
+    - topic: esp32/4ch_relay/${device_name}/relay3/set
+      payload: "OFF"
+      then: [switch.turn_off: relay3]
+
+    - topic: esp32/4ch_relay/${device_name}/relay4/set
+      payload: "ON"
+      then: [switch.turn_on: relay4]
+    - topic: esp32/4ch_relay/${device_name}/relay4/set
+      payload: "OFF"
+      then: [switch.turn_off: relay4]
+
+    - topic: esp32/4ch_relay/${device_name}/relay9/set
+      payload: "ON"
+      then: [switch.turn_on: relay9]
+    - topic: esp32/4ch_relay/${device_name}/relay9/set
+      payload: "OFF"
+      then: [switch.turn_off: relay9]
