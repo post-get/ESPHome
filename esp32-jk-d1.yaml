@@ -50,7 +50,6 @@ ota:
   platform: esphome
   password: !secret ota_password
 
-# 唯一MQTT区块，合并连接+订阅，无重复key
 mqtt:
   broker: 10.10.8.197
   port: 1883
@@ -58,10 +57,16 @@ mqtt:
   password: mqtt1
   client_id: ${device_name}
   id: mqtt_client
-  availability:
+  birth_message:
     topic: esp32/4ch_relay/${device_name}/availability
-    payload_available: online
-    payload_not_available: offline
+    payload: online
+    qos: 1
+    retain: true
+  will_message:
+    topic: esp32/4ch_relay/${device_name}/availability
+    payload: offline
+    qos: 1
+    retain: true
   on_connect:
     then:
       - logger.log: "MQTT连接成功"
@@ -72,28 +77,24 @@ mqtt:
     - topic: esp32/4ch_relay/${device_name}/relay1/set
       payload: "OFF"
       then: [switch.turn_off: relay1]
-
     - topic: esp32/4ch_relay/${device_name}/relay2/set
       payload: "ON"
       then: [switch.turn_on: relay2]
     - topic: esp32/4ch_relay/${device_name}/relay2/set
       payload: "OFF"
       then: [switch.turn_off: relay2]
-
     - topic: esp32/4ch_relay/${device_name}/relay3/set
       payload: "ON"
       then: [switch.turn_on: relay3]
     - topic: esp32/4ch_relay/${device_name}/relay3/set
       payload: "OFF"
       then: [switch.turn_off: relay3]
-
     - topic: esp32/4ch_relay/${device_name}/relay4/set
       payload: "ON"
       then: [switch.turn_on: relay4]
     - topic: esp32/4ch_relay/${device_name}/relay4/set
       payload: "OFF"
       then: [switch.turn_off: relay4]
-
     - topic: esp32/4ch_relay/${device_name}/relay9/set
       payload: "ON"
       then: [switch.turn_on: relay9]
