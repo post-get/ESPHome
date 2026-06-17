@@ -55,11 +55,11 @@ binary_sensor:
     jk_bms_ble_id: bms_d1
     balancing:
       name: "D1_BAL 均衡中"
-    charging_status:
+    charging:
       name: "D1_ST_CHG 充电状态"
-    discharging_status:
+    discharging:
       name: "D1_ST_DIS 放电状态"
-    online:
+    online_status:
       name: "D1_ON BMS在线状态"
 
 sensor:
