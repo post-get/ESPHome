@@ -44,7 +44,7 @@ jk_bms_ble:
   ble_client_id: ble_d2
   id: bms_d2
   protocol_version: JK02_32S
-  throttle: 5s
+  throttle: 10s
 
 # 【语义修正】开关=下发控制指令，标注控制闸区分硬件状态
 switch:
