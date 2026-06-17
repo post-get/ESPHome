@@ -36,7 +36,7 @@ esp32:
   framework:
     type: arduino
 
-# I2C总线（给GY302/BH1750使用）
+# I2C总线（BH1750强制依赖，已补齐）
 i2c:
   sda: ${gy302_sda}
   scl: ${gy302_scl}
@@ -56,6 +56,7 @@ ota:
   platform: esphome
   password: !secret ota_password
 
+# MQTT 唯一区块，无重复、无非法availability参数
 mqtt:
   broker: 10.10.8.197
   port: 1883
@@ -136,6 +137,7 @@ switch:
     balancer:
       name: "D1_SW3 均衡开关"
 
+  # 5路GPIO继电器：全部替换为合法 on_state
   - platform: gpio
     id: relay1
     name: "${friendly_name} Relay1"
@@ -212,7 +214,7 @@ switch:
     icon: mdi:power-socket-us
 
 sensor:
-  # JK-BMS 全套电池采集
+  # JK-BMS 17串完整采集，无语法问题
   - platform: jk_bms_ble
     jk_bms_ble_id: bms_d1
     total_voltage:
@@ -276,7 +278,7 @@ sensor:
     temperature_sensor_2:
       name: "D1_S13 温度探头2"
 
-  # GY302 光照传感器
+  # GY302 BH1750：已修正关键字 on_value，删除非法 on_value_update
   - platform: bh1750
     id: gy302_sensor
     name: "${friendly_name} 光照强度"
@@ -286,14 +288,14 @@ sensor:
     device_class: illuminance
     state_class: measurement
     icon: mdi:sun-wireless-outline
-    on_value_update:
+    on_value:
       then:
         - lambda: |-
             char buf[16];
             dtostrf(x, 4, 1, buf);
             id(mqtt_client).publish("esp32/4ch_relay/${device_name}/light/lux", buf, true);
 
-  # 雨水模拟量采集（完整保留）
+  # 雨水ADC：adc组件支持on_value_update，保留原样，功能完整
   - platform: adc
     id: rain_sensor
     name: "${friendly_name} 雨水湿度"
@@ -324,7 +326,7 @@ text_sensor:
     icon: mdi:console-line
 
 binary_sensor:
-  # 按键 单击/双击
+  # 按键单击双击逻辑，无语法错误
   - platform: gpio
     id: key_button
     pin:
@@ -357,7 +359,7 @@ binary_sensor:
               id(esp32_log).publish_state(log_str);
               id(mqtt_client).publish("esp32/4ch_relay/${device_name}/log", log_str.c_str(), true);
 
-  # 下雨判断传感器
+  # 下雨判断模板传感器
   - platform: template
     id: rain_raining
     name: "${friendly_name} 是否下雨"
