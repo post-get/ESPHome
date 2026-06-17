@@ -136,7 +136,7 @@ switch:
     pin:
       number: ${relay1_pin}
       inverted: true
-    on_state_change:
+    on_state:
       then:
         - lambda: |-
             id(relay_storage).begin("relay", false);
@@ -151,7 +151,7 @@ switch:
     pin:
       number: ${relay2_pin}
       inverted: true
-    on_state_change:
+    on_state:
       then:
         - lambda: |-
             id(relay_storage).begin("relay", false);
@@ -166,7 +166,7 @@ switch:
     pin:
       number: ${relay3_pin}
       inverted: true
-    on_state_change:
+    on_state:
       then:
         - lambda: |-
             id(relay_storage).begin("relay", false);
@@ -181,7 +181,7 @@ switch:
     pin:
       number: ${relay4_pin}
       inverted: true
-    on_state_change:
+    on_state:
       then:
         - lambda: |-
             id(relay_storage).begin("relay", false);
@@ -196,7 +196,7 @@ switch:
     pin:
       number: ${relay9_pin}
       inverted: false
-    on_state_change:
+    on_state:
       then:
         - lambda: |-
             id(relay_storage).begin("relay", false);
