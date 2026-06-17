@@ -290,10 +290,10 @@ sensor:
             dtostrf(x, 4, 1, buf);
             id(mqtt_client).publish("esp32/4ch_relay/${device_name}/light/lux", buf, true);
 
-  # 雨水ADC 已修正关键字 on_value
+  # 雨水名称末尾加1，解决ID冲突
   - platform: adc
     id: rain_sensor
-    name: "${friendly_name} 雨水湿度"
+    name: "${friendly_name} 雨水湿度1"
     pin: ${rain_ao_pin}
     update_interval: 2s
     attenuation: 11db
