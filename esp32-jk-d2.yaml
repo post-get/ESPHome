@@ -1,0 +1,124 @@
+esphome:
+  name: esp32-jk-bms-only-2
+  friendly_name: D2电池
+
+external_components:
+  - source: github://syssi/esphome-jk-bms@main
+    components: [jk_bms_ble]
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+
+logger:
+  level: INFO
+
+api:
+
+ota:
+  platform: esphome
+  password: !secret ota_password
+
+esp32_ble_tracker:
+
+ble_client:
+  mac_address: "98:DA:10:07:AD:85"
+  id: ble_d2
+
+jk_bms_ble:
+  ble_client_id: ble_d2
+  id: bms_d2
+  protocol_version: JK02_32S
+  throttle: 10s
+
+switch:
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms_d2
+    charging:
+      name: "D2_SW1 充电开关"
+    discharging:
+      name: "D2_SW2 放电开关"
+    balancer:
+      name: "D2_SW3 均衡开关"
+
+sensor:
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms_d2
+    total_voltage:
+      name: "D2_S01 总电压"
+    current:
+      name: "D2_S02 充放电电流"
+    power:
+      name: "D2_S03 实时功率"
+    state_of_charge:
+      name: "D2_S04 SOC电量"
+    capacity_remaining:
+      name: "D2_S05 剩余容量"
+    total_charging_cycle_capacity:
+      name: "D2_S06 总循环容量AH"
+    average_cell_voltage:
+      name: "D2_S07 平均单串电压"
+    min_cell_voltage:
+      name: "D2_S08 单串最低电压"
+    max_cell_voltage:
+      name: "D2_S09 单串最高电压"
+    delta_cell_voltage:
+      name: "D2_S10 电芯压差"
+    cell_voltage_1:
+      name: "D2_CELL01 第1串电压"
+    cell_voltage_2:
+      name: "D2_CELL02 第2串电压"
+    cell_voltage_3:
+      name: "D2_CELL03 第3串电压"
+    cell_voltage_4:
+      name: "D2_CELL04 第4串电压"
+    cell_voltage_5:
+      name: "D2_CELL05 第5串电压"
+    cell_voltage_6:
+      name: "D2_CELL06 第6串电压"
+    cell_voltage_7:
+      name: "D2_CELL07 第7串电压"
+    cell_voltage_8:
+      name: "D2_CELL08 第8串电压"
+    cell_voltage_9:
+      name: "D2_CELL09 第9串电压"
+    cell_voltage_10:
+      name: "D2_CELL10 第10串电压"
+    cell_voltage_11:
+      name: "D2_CELL11 第11串电压"
+    cell_voltage_12:
+      name: "D2_CELL12 第12串电压"
+    cell_voltage_13:
+      name: "D2_CELL13 第13串电压"
+    cell_voltage_14:
+      name: "D2_CELL14 第14串电压"
+    cell_voltage_15:
+      name: "D2_CELL15 第15串电压"
+    cell_voltage_16:
+      name: "D2_CELL16 第16串电压"
+    cell_voltage_17:
+      name: "D2_CELL17 第17串电压"
+    mosfet_temperature:
+      name: "D2_S11 MOS管温度"
+    temperature_sensor_1:
+      name: "D2_S12 温度探头1"
+    temperature_sensor_2:
+      name: "D2_S13 温度探头2"
+
+text_sensor:
+  - platform: jk_bms_ble
+    jk_bms_ble_id: bms_d2
+    total_runtime_formatted:
+      name: "D2_T01 累计运行时长"
+    errors:
+      name: "D2_T02 BMS故障日志"
+
+#不需要状态灯直接删除下面两行
+status_led:
+  pin: GPIO2
