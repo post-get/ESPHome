@@ -45,7 +45,6 @@ jk_bms_ble:
   id: bms_d2
   protocol_version: JK02_32S
   throttle: 5s
-  reconnect_delay: 2s  # 断线2秒自动重试连接
 
 # 【语义修正】开关=下发控制指令，标注控制闸区分硬件状态
 switch:
