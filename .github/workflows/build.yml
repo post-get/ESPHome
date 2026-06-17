@@ -14,7 +14,6 @@ jobs:
       matrix:
         yaml_file:
           - esp32-jk-d1.yaml
-          - esp32-c3-mini.yaml
     steps:
       - name: 拉取仓库代码
         uses: actions/checkout@v4
