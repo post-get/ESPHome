@@ -8,6 +8,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # 矩阵同时编译两套配置
+    strategy:
+      fail-fast: false
+      matrix:
+        yaml_file:
+          - esp32-jk-d1.yaml
+          - esp32-c3-mini.yaml
     steps:
       - name: 拉取仓库代码
         uses: actions/checkout@v4
@@ -18,23 +25,26 @@ jobs:
           wifi_ssid: ${{ secrets.WIFI_SSID }}
           wifi_password: ${{ secrets.WIFI_PASSWORD }}
           ota_password: ${{ secrets.OTA_PASSWORD }}
+          mqtt_broker: ${{ secrets.MQTT_BROKER }}
+          mqtt_user: ${{ secrets.MQTT_USER }}
+          mqtt_password: ${{ secrets.MQTT_PASSWORD }}
           EOF
 
-      - name: ESPHome 云端编译固件
+      - name: ESPHome 云端编译固件 ${{ matrix.yaml_file }}
         uses: esphome/build-action@v7.1.0
         with:
-          yaml-file: esp32-jk-d1.yaml
+          yaml-file: ${{ matrix.yaml_file }}
           version: stable
 
       # 打印目录结构（调试用，可后续删除）
       - name: 打印编译输出目录结构
         run: ls -laR ./.esphome/build
 
-      # 开启隐藏目录读取，递归匹配所有bin
-      - name: 上传编译成品固件（可下载）
+      # 分开上传，工件名称区分板子
+      - name: 上传固件 ${{ matrix.yaml_file }}
         uses: actions/upload-artifact@v4
         with:
-          name: esp32-firmware-bin
+          name: ${{ matrix.yaml_file }}-bin
           path: ./.esphome/build/**/*.bin
           if-no-files-found: ignore
           include-hidden-files: true
