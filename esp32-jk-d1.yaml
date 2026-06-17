@@ -36,6 +36,12 @@ esp32:
   framework:
     type: arduino
 
+# I2C总线（给GY302/BH1750使用）
+i2c:
+  sda: ${gy302_sda}
+  scl: ${gy302_scl}
+  scan: true
+
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
@@ -206,6 +212,7 @@ switch:
     icon: mdi:power-socket-us
 
 sensor:
+  # JK-BMS 全套电池采集
   - platform: jk_bms_ble
     jk_bms_ble_id: bms_d1
     total_voltage:
@@ -269,13 +276,12 @@ sensor:
     temperature_sensor_2:
       name: "D1_S13 温度探头2"
 
+  # GY302 光照传感器
   - platform: bh1750
     id: gy302_sensor
     name: "${friendly_name} 光照强度"
     address: 0x23
     update_interval: 2s
-    sda: ${gy302_sda}
-    scl: ${gy302_scl}
     unit_of_measurement: lx
     device_class: illuminance
     state_class: measurement
@@ -287,6 +293,7 @@ sensor:
             dtostrf(x, 4, 1, buf);
             id(mqtt_client).publish("esp32/4ch_relay/${device_name}/light/lux", buf, true);
 
+  # 雨水模拟量采集（完整保留）
   - platform: adc
     id: rain_sensor
     name: "${friendly_name} 雨水湿度"
@@ -317,6 +324,7 @@ text_sensor:
     icon: mdi:console-line
 
 binary_sensor:
+  # 按键 单击/双击
   - platform: gpio
     id: key_button
     pin:
@@ -349,6 +357,7 @@ binary_sensor:
               id(esp32_log).publish_state(log_str);
               id(mqtt_client).publish("esp32/4ch_relay/${device_name}/log", log_str.c_str(), true);
 
+  # 下雨判断传感器
   - platform: template
     id: rain_raining
     name: "${friendly_name} 是否下雨"
