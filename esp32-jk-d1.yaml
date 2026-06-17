@@ -11,8 +11,6 @@ esphome:
       - switch.turn_off: relay3
       - switch.turn_off: relay4
       - switch.turn_off: relay9
-      # 清除历史安全模式故障标记
-      - safe_mode.clear
 
 substitutions:
   device_name: esp32_jk_d1
