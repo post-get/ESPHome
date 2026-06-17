@@ -123,6 +123,6 @@ text_sensor:
     errors:
       name: "D1_T02 BMS故障日志"
       
-#不需要状态灯就删掉末尾这行
+#不需要状态灯就删掉末尾这行，
 status_led:
   pin: GPIO2
