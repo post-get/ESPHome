@@ -5,27 +5,17 @@ esphome:
     priority: 600
     then:
       - logger.log: "设备启动完成"
-      # 上电全部继电器关闭，防止上电浮空电平误吸合导致掉电重启
-      - switch.turn_off: relay1
-      - switch.turn_off: relay2
-      - switch.turn_off: relay3
-      - switch.turn_off: relay4
-      - switch.turn_off: relay9
 
 substitutions:
   device_name: esp32_jk_d1
   friendly_name: D1电池采集ESP32
-  # 继电器 安全输出引脚
   relay1_pin: GPIO1
   relay2_pin: GPIO2
   relay3_pin: GPIO3
   relay4_pin: GPIO4
   relay9_pin: GPIO16
-  # 按键 安全输入引脚 GPIO27(板载RX)
   key_pin: GPIO27
-  # 雨水ADC 安全模拟输入 GPIO34
   rain_ao_pin: GPIO34
-  # BH1750光照 硬件I2C引脚 D2=GPIO21(SDA) D1=GPIO22(SCL)
   gy302_sda: GPIO21
   gy302_scl: GPIO22
 
