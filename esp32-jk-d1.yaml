@@ -4,15 +4,8 @@ esphome:
   on_boot:
     priority: 600
     then:
-      - lambda: |-
-          for (int i = 0; i < 5; i++) {
-            bool state = id(relay_storage).get_bool(String(i).c_str(), false);
-            if (i == 0) id(relay1).publish_state(state);
-            if (i == 1) id(relay2).publish_state(state);
-            if (i == 2) id(relay3).publish_state(state);
-            if (i == 3) id(relay4).publish_state(state);
-            if (i == 4) id(relay9).publish_state(state);
-          }
+      # 彻底删除旧Preferences读取代码，restore_value自动接管
+      - logger.log: "设备启动完成"
 
 substitutions:
   device_name: esp32_jk_d1
@@ -119,11 +112,7 @@ jk_bms_ble:
   protocol_version: JK02_32S
   throttle: 10s
 
-globals:
-  - id: relay_storage
-    type: Preferences
-    restore_value: no
-    initial_value: 'Preferences()'
+# 彻底删除globals relay_storage，废弃API全部移除
 
 switch:
   - platform: jk_bms_ble
@@ -141,13 +130,14 @@ switch:
     pin:
       number: ${relay1_pin}
       inverted: true
+    restore_value: true
     on_state:
       then:
         - lambda: |-
-            id(relay_storage).begin("relay", false);
-            id(relay_storage).put_bool("0", x);
-            id(relay_storage).end();
-            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay1/state", x ? "ON" : "OFF", true);
+            char buf[16];
+            auto state = id(relay1).state;
+            dtostrf(state, 1, 0, buf);
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay1/state", buf, true);
     icon: mdi:power-socket-us
 
   - platform: gpio
@@ -156,13 +146,14 @@ switch:
     pin:
       number: ${relay2_pin}
       inverted: true
+    restore_value: true
     on_state:
       then:
         - lambda: |-
-            id(relay_storage).begin("relay", false);
-            id(relay_storage).put_bool("1", x);
-            id(relay_storage).end();
-            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay2/state", x ? "ON" : "OFF", true);
+            char buf[16];
+            auto state = id(relay2).state;
+            dtostrf(state, 1, 0, buf);
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay2/state", buf, true);
     icon: mdi:power-socket-us
 
   - platform: gpio
@@ -171,13 +162,14 @@ switch:
     pin:
       number: ${relay3_pin}
       inverted: true
+    restore_value: true
     on_state:
       then:
         - lambda: |-
-            id(relay_storage).begin("relay", false);
-            id(relay_storage).put_bool("2", x);
-            id(relay_storage).end();
-            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay3/state", x ? "ON" : "OFF", true);
+            char buf[16];
+            auto state = id(relay3).state;
+            dtostrf(state, 1, 0, buf);
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay3/state", buf, true);
     icon: mdi:power-socket-us
 
   - platform: gpio
@@ -186,13 +178,14 @@ switch:
     pin:
       number: ${relay4_pin}
       inverted: true
+    restore_value: true
     on_state:
       then:
         - lambda: |-
-            id(relay_storage).begin("relay", false);
-            id(relay_storage).put_bool("3", x);
-            id(relay_storage).end();
-            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay4/state", x ? "ON" : "OFF", true);
+            char buf[16];
+            auto state = id(relay4).state;
+            dtostrf(state, 1, 0, buf);
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay4/state", buf, true);
     icon: mdi:power-socket-us
 
   - platform: gpio
@@ -201,13 +194,14 @@ switch:
     pin:
       number: ${relay9_pin}
       inverted: false
+    restore_value: true
     on_state:
       then:
         - lambda: |-
-            id(relay_storage).begin("relay", false);
-            id(relay_storage).put_bool("4", x);
-            id(relay_storage).end();
-            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay9/state", x ? "ON" : "OFF", true);
+            char buf[16];
+            auto state = id(relay9).state;
+            dtostrf(state, 1, 0, buf);
+            id(mqtt_client).publish("esp32/4ch_relay/${device_name}/relay9/state", buf, true);
     icon: mdi:power-socket-us
 
 sensor:
