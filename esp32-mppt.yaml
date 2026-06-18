@@ -1,0 +1,50 @@
+esphome:
+  name: modbus-full-scanner
+  platform: esp32
+  board: nodemcu-32s
+  on_boot:
+    - delay: 2s
+    - lambda: |-
+        auto modbus_hub = id(modbus_bus);
+        ESP_LOGI("SCAN", "===== 全量扫描Modbus从站 1~247 开始 =====");
+        for(uint8_t slave_id = 1; slave_id <= 247; slave_id++){
+          ESP_LOGI("SCAN", "探测 ID:%d", slave_id);
+          auto req = modbus_hub->read_holding_registers(slave_id, 0, 1);
+          req->on_response([slave_id](ModbusReadResponse resp){
+            ESP_LOGW("SCAN", "✅ 在线从站 ID = %d", slave_id);
+          });
+          req->on_error([slave_id](ModbusError err){
+            if(err != MODBUS_ERROR_TIMEOUT)
+              ESP_LOGD("SCAN", "ID:%d 设备存在，寄存器非法", slave_id);
+          });
+          modbus_hub->send_request(req);
+          delay(350);
+        }
+        ESP_LOGI("SCAN", "===== 全量扫描完成 =====");
+
+wifi:
+  ssid: "Yubaobao"
+  password: "qq7777777"
+
+web_server:
+  port: 80
+
+logger:
+  level: DEBUG
+
+api:
+ota:
+
+uart:
+  id: rs485_uart
+  tx_pin: GPIO17
+  rx_pin: GPIO16
+  baud_rate: 9600
+  parity: NONE
+  stop_bits: 1
+
+modbus:
+  id: modbus_bus
+  uart_id: rs485_uart
+  flow_control_pin: GPIO4
+  send_wait_time: 200ms
