@@ -20,11 +20,13 @@ esphome:
         }
         ESP_LOGI("SCAN", "===== 全量扫描完成 =====");
 
-# 独立ESP32区块，修复旧版platform语法报错
+# ESP32区块：指定IDF框架消除警告
 esp32:
   board: nodemcu-32s
+  framework:
+    type: esp-idf
 
-# WiFi采用secret密钥格式，需要在Secrets页面填写对应值
+# WiFi密钥格式，去Secrets页面填写对应值
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
@@ -36,9 +38,10 @@ logger:
   level: DEBUG
 
 api:
+# OTA修复：补充platform: esphome
 ota:
+  platform: esphome
 
-# RS485串口引脚配置不变
 uart:
   id: rs485_uart
   tx_pin: GPIO17
