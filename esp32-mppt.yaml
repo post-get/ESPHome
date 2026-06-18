@@ -3,30 +3,36 @@ esphome:
   on_boot:
     - delay: 2s
     - lambda: |-
-        auto modbus_hub = id(modbus_bus);
-        ESP_LOGI("SCAN", "===== 全量扫描Modbus从站 1~247 开始 =====");
-        for(uint8_t slave_id = 1; slave_id <= 247; slave_id++){
-          ESP_LOGI("SCAN", "探测 ID:%d", slave_id);
-          auto req = modbus_hub->read_holding_registers(slave_id, 0, 1);
-          req->on_response([slave_id](ModbusReadResponse resp){
-            ESP_LOGW("SCAN", "✅ 在线从站 ID = %d", slave_id);
-          });
-          req->on_error([slave_id](ModbusError err){
-            if(err != MODBUS_ERROR_TIMEOUT)
-              ESP_LOGD("SCAN", "ID:%d 设备存在，寄存器非法", slave_id);
-          });
-          modbus_hub->send_request(req);
-          delay(350);
+        auto &mbus = id(modbus_bus);
+        ESP_LOGI("SCAN", "===== 扫描Modbus从站 1~100 开始 =====");
+        // 循环1~100，覆盖81
+        for(uint8_t slave_id = 1; slave_id <= 100; slave_id++){
+          ESP_LOGI("SCAN", "正在探测 ID:%d", slave_id);
+          // 标准读保持寄存器回调写法
+          mbus.read_holding_registers(
+            slave_id,
+            0,
+            1,
+            // 读取成功回调：设备在线
+            [slave_id](ModbusRegisterResponse resp){
+              ESP_LOGW("SCAN", "✅ 在线从站 ID = %d", slave_id);
+            },
+            // 读取失败回调
+            [slave_id](ModbusErrorType err){
+              if(err != MODBUS_ERROR_TIMEOUT){
+                ESP_LOGD("SCAN", "ID:%d 设备存在，寄存器地址不匹配", slave_id);
+              }
+            }
+          );
+          delay(300);
         }
-        ESP_LOGI("SCAN", "===== 全量扫描完成 =====");
+        ESP_LOGI("SCAN", "===== 1~100扫描完成 =====");
 
-# ESP32区块：指定IDF框架消除警告
 esp32:
   board: nodemcu-32s
   framework:
     type: esp-idf
 
-# WiFi密钥格式，去Secrets页面填写对应值
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
@@ -38,7 +44,6 @@ logger:
   level: DEBUG
 
 api:
-# OTA修复：补充platform: esphome
 ota:
   platform: esphome
 
