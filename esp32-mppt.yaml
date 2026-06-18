@@ -1,7 +1,5 @@
 esphome:
   name: modbus-full-scanner
-  platform: esp32
-  board: nodemcu-32s
   on_boot:
     - delay: 2s
     - lambda: |-
@@ -21,6 +19,10 @@ esphome:
           delay(350);
         }
         ESP_LOGI("SCAN", "===== 全量扫描完成 =====");
+
+# 单独拆分ESP32平台配置（修复报错关键）
+esp32:
+  board: nodemcu-32s
 
 wifi:
   ssid: "Yubaobao"
