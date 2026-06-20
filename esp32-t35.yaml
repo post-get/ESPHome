@@ -1,42 +1,55 @@
 esphome:
   name: esp32-t35
   friendly_name: ESP32 T35蓝牙桥接
+  # 可选：日志输出，方便调试T35蓝牙数据
+  on_boot:
+    - logger.log: "T35蓝牙网关启动完成"
 
 esp32:
   board: esp32dev
-  # 强制锁定Arduino框架，彻底规避IDF OTA组件缺失问题
   framework:
     type: arduino
 
-# WiFi 联网，密钥与CI生成文件完全匹配
+# WiFi 联网，密钥匹配CI生成的secrets.yaml
 wifi:
   ssid: !secret WIFI_SSID
   password: !secret WIFI_PASSWORD
+  # 可选WiFi fallback热点，断网可直连配网
+  ap:
+    ssid: "ESP32-T35 Fallback"
+    password: "TempPass123456"
+  captive_portal:
 
-# Arduino框架下OTA无需填写platform，不会触发 requires platform 报错
-ota:
-  password: !secret OTA_PASSWORD
+# 日志（可选，排查蓝牙广播问题）
+logger:
 
-# HA原生直连，移除加密，不再需要API_KEY密钥
+# HA原生API直连，无加密，彻底消除API_KEY缺失报错
 api:
 
-# 蓝牙代理持续扫描T35广播
+# 【核心修复：新版OTA标准列表写法，解决platform缺失报错】
+ota:
+  - platform: esphome
+    password: !secret OTA_PASSWORD
+
+# 蓝牙代理，实时抓取T35每10秒广播
 bluetooth_proxy:
   active: true
 
-# 乐易仕T35传感器解析
+# 乐易仕T35（loease.sensor_ht.t49bt）解析配置，你的MAC+KEY直接复用
 sensor:
   - platform: xiaomi_ble
     mac_address: BC:A8:44:24:06:D7
     bindkey: !secret T35_KEY
     temperature:
-      name: "T35 温度"
+      name: "T35 室内温度"
       state_class: measurement
       unit_of_measurement: "°C"
+      accuracy_decimals: 1
     humidity:
-      name: "T35 湿度"
+      name: "T35 室内湿度"
       state_class: measurement
       unit_of_measurement: "%"
+      accuracy_decimals: 0
     battery_level:
-      name: "T35 设备电量"
+      name: "T35 温湿度计电量"
       unit_of_measurement: "%"
