@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 矩阵同时编译两套配置
     strategy:
       fail-fast: false
       matrix:
@@ -18,30 +17,25 @@ jobs:
       - name: 拉取仓库代码
         uses: actions/checkout@v4
 
-      - name: 生成ESPHome密钥文件
+      - name: 生成secrets.yaml密钥文件
         run: |
           cat > secrets.yaml << EOF
           WIFI_SSID: ${{ secrets.WIFI_SSID }}
           WIFI_PASSWORD: ${{ secrets.WIFI_PASSWORD }}
           OTA_PASSWORD: ${{ secrets.OTA_PASSWORD }}
           T35_KEY: ${{ secrets.T35_KEY }}
-          MQTT_BROKER: ${{ secrets.MQTT_BROKER }}
-          MQTT_USER: ${{ secrets.MQTT_USER }}
-          MQTT_PASSWORD: ${{ secrets.MQTT_PASSWORD }}
           EOF
 
-      - name: ESPHome 云端编译固件 ${{ matrix.yaml_file }}
+      - name: ESPHome云端编译固件
         uses: esphome/build-action@v7.1.0
         with:
           yaml-file: ${{ matrix.yaml_file }}
           version: stable
 
-      # 打印目录结构（调试用，可后续删除）
-      - name: 打印编译输出目录结构
+      - name: 打印编译目录（调试用，可删除）
         run: ls -laR ./.esphome/build
 
-      # 分开上传，工件名称区分板子
-      - name: 上传固件 ${{ matrix.yaml_file }}
+      - name: 上传固件bin文件
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.yaml_file }}-bin
