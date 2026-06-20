@@ -4,24 +4,28 @@ esphome:
 
 esp32:
   board: esp32dev
+  # 可选：切换IDF框架，按需开启
+  # framework:
+  #   type: esp-idf
 
-# WiFi 局域网联网，依赖Workflow生成的secrets.yaml
+# WiFi联网
 wifi:
   ssid: !secret WIFI_SSID
   password: !secret WIFI_PASSWORD
 
-# OTA远程升级
+# 修复OTA缺少platform报错，添加平台声明
 ota:
+  platform: esp32
   password: !secret OTA_PASSWORD
 
-# ESPHome原生API直连Home Assistant（移除加密，不需要API_KEY）
+# 原生HA直连，移除加密，不再需要API_KEY
 api:
 
-# 蓝牙代理，持续扫描T35广播
+# 蓝牙代理扫描T35广播
 bluetooth_proxy:
   active: true
 
-# 乐易仕T35温湿度、电量解析
+# T35温湿度电量解析
 sensor:
   - platform: xiaomi_ble
     mac_address: BC:A8:44:24:06:D7
