@@ -1,13 +1,46 @@
+esphome:
+  name: esp32-t35
+  friendly_name: ESP32 T35蓝牙桥接
+
+esp32:
+  board: esp32dev
+
+# WiFi（必须，直连HA依赖局域网WiFi）
+wifi:
+  ssid: !secret WIFI_SSID
+  password: !secret WIFI_PASSWORD
+  # 可选固定IP，方便HA发现设备
+  # manual_ip:
+  #   static_ip: 192.168.1.120
+  #   gateway: 192.168.1.1
+  #   subnet: 255.255.255.0
+
+# OTA远程升级
+ota:
+  password: !secret OTA_PASSWORD
+
+# ESPHome原生HA直连组件（默认自带，无需额外配置）
+api:
+  encryption:
+    key: !secret API_KEY # 可选：新增仓库Secret API_KEY加密通信，不加也能裸连
+
+# 蓝牙代理扫描T35广播
 bluetooth_proxy:
   active: true
 
+# T35温湿度电量解析
 sensor:
   - platform: xiaomi_ble
     mac_address: BC:A8:44:24:06:D7
-    bindkey: !secret t35_key
+    bindkey: !secret T35_KEY # 大写匹配仓库secret，解决编译缺失报错
     temperature:
       name: "T35 温度"
+      state_class: measurement
+      unit_of_measurement: "°C"
     humidity:
       name: "T35 湿度"
+      state_class: measurement
+      unit_of_measurement: "%"
     battery_level:
-      name: "T35 电量"
+      name: "T35 设备电量"
+      unit_of_measurement: "%"
