@@ -1,0 +1,13 @@
+bluetooth_proxy:
+  active: true
+
+sensor:
+  - platform: xiaomi_ble
+    mac_address: BC:A8:44:24:06:D7
+    bindkey: !secret t35_key
+    temperature:
+      name: "T35 温度"
+    humidity:
+      name: "T35 湿度"
+    battery_level:
+      name: "T35 电量"
