@@ -5,34 +5,27 @@ esphome:
 esp32:
   board: esp32dev
 
-# WiFi（必须，直连HA依赖局域网WiFi）
+# WiFi 局域网联网，依赖Workflow生成的secrets.yaml
 wifi:
   ssid: !secret WIFI_SSID
   password: !secret WIFI_PASSWORD
-  # 可选固定IP，方便HA发现设备
-  # manual_ip:
-  #   static_ip: 192.168.1.120
-  #   gateway: 192.168.1.1
-  #   subnet: 255.255.255.0
 
 # OTA远程升级
 ota:
   password: !secret OTA_PASSWORD
 
-# ESPHome原生HA直连组件（默认自带，无需额外配置）
+# ESPHome原生API直连Home Assistant（移除加密，不需要API_KEY）
 api:
-  encryption:
-    key: !secret API_KEY # 可选：新增仓库Secret API_KEY加密通信，不加也能裸连
 
-# 蓝牙代理扫描T35广播
+# 蓝牙代理，持续扫描T35广播
 bluetooth_proxy:
   active: true
 
-# T35温湿度电量解析
+# 乐易仕T35温湿度、电量解析
 sensor:
   - platform: xiaomi_ble
     mac_address: BC:A8:44:24:06:D7
-    bindkey: !secret T35_KEY # 大写匹配仓库secret，解决编译缺失报错
+    bindkey: !secret T35_KEY
     temperature:
       name: "T35 温度"
       state_class: measurement
