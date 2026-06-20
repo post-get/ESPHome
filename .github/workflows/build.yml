@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         yaml_file:
-          - esp32-mppt.yaml
+          - esp32-t35.yaml
     steps:
       - name: 拉取仓库代码
         uses: actions/checkout@v4
