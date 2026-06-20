@@ -21,12 +21,13 @@ jobs:
       - name: 生成ESPHome密钥文件
         run: |
           cat > secrets.yaml << EOF
-          wifi_ssid: ${{ secrets.WIFI_SSID }}
-          wifi_password: ${{ secrets.WIFI_PASSWORD }}
-          ota_password: ${{ secrets.OTA_PASSWORD }}
-          mqtt_broker: ${{ secrets.MQTT_BROKER }}
-          mqtt_user: ${{ secrets.MQTT_USER }}
-          mqtt_password: ${{ secrets.MQTT_PASSWORD }}
+          WIFI_SSID: ${{ secrets.WIFI_SSID }}
+          WIFI_PASSWORD: ${{ secrets.WIFI_PASSWORD }}
+          OTA_PASSWORD: ${{ secrets.OTA_PASSWORD }}
+          T35_KEY: ${{ secrets.T35_KEY }}
+          MQTT_BROKER: ${{ secrets.MQTT_BROKER }}
+          MQTT_USER: ${{ secrets.MQTT_USER }}
+          MQTT_PASSWORD: ${{ secrets.MQTT_PASSWORD }}
           EOF
 
       - name: ESPHome 云端编译固件 ${{ matrix.yaml_file }}
