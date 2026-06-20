@@ -4,27 +4,27 @@ esphome:
 
 esp32:
   board: esp32dev
-  # 强制使用Arduino框架，修复OTA平台找不到的报错
+  # 显式指定IDF框架，消除提示，同时适配新版OTA语法
   framework:
-    type: arduino
+    type: esp-idf
 
-# WiFi联网
 wifi:
   ssid: !secret WIFI_SSID
   password: !secret WIFI_PASSWORD
 
-# OTA 标准写法（Arduino框架下直接写，不需要platform字段）
+# ESP-IDF 框架必须写 platform: esp32_idf
 ota:
+  platform: esp32_idf
   password: !secret OTA_PASSWORD
 
-# 原生HA直连，无加密，不需要API_KEY
+# 原生HA直连，无加密，不再需要API_KEY密钥
 api:
 
 # 蓝牙代理扫描T35广播
 bluetooth_proxy:
   active: true
 
-# T35温湿度、电量解析
+# 乐易仕T35温湿度电量解析
 sensor:
   - platform: xiaomi_ble
     mac_address: BC:A8:44:24:06:D7
